@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Business Intelligence Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161e;
+      --surface2: #1a1e2a;
+      --border: rgba(255,255,255,0.07);
+      --accent: #c8a96e;
+      --accent2: #7eb8c9;
+      --text: #e8e6e0;
+      --muted: #7a7d8a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(200,169,110,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(126,184,201,0.07) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Subtle grid texture */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 64px 24px 80px;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 52px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.7;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .description {
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 560px;
+      border-left: 2px solid var(--border);
+      padding-left: 20px;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .divider-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 40px;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .stat-sep {
+      width: 1px;
+      background: var(--border);
+      align-self: stretch;
+    }
+
+    /* Chart container */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      animation: fadeUp 0.9s 0.3s ease both;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .chart-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(200,169,110,0.04), transparent 50%, rgba(126,184,201,0.03));
+      pointer-events: none;
+      z-index: 1;
+      border-radius: inherit;
+    }
+
+    .chart-header {
+      padding: 20px 28px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chart-title {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      background: rgba(126,184,201,0.08);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(126,184,201,0.15);
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: pulse 2s ease infinite;
+    }
+
+    .iframe-wrapper {
+      width: 100%;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .iframe-wrapper iframe {
+      width: 100%;
+      max-width: 100%;
+      height: 450px;
+      border: none;
+      border-radius: 8px;
+      display: block;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+
+    .footer-note {
+      font-size: 12px;
+      color: var(--muted);
+      opacity: 0.6;
+    }
+
+    .footer-badge {
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.5;
+      letter-spacing: 0.06em;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .page-wrapper { padding: 40px 16px 60px; }
+      .stats-bar { gap: 20px; }
+      .stat-value { font-size: 1.2rem; }
+      .iframe-wrapper { padding: 16px; }
+      .iframe-wrapper iframe { height: 340px; }
+      footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <header>
+      <div class="eyebrow">Laporan Analitik</div>
+      <h1>Ikhtisar Kinerja <em>Bisnis</em> Strategis</h1>
+      <p class="description">
+        Pantau metrik utama dan tren performa secara menyeluruh melalui visualisasi data
+        interaktif yang diperbarui secara berkala — dirancang untuk mendukung pengambilan
+        keputusan berbasis data yang lebih cepat dan akurat.
+      </p>
+    </header>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-dot"></div>
+      <div class="divider-line" style="background: linear-gradient(90deg, transparent, var(--border));"></div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-value">Real-time</span>
+        <span class="stat-label">Pembaruan Data</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat">
+        <span class="stat-value">Looker</span>
+        <span class="stat-label">Sumber Platform</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat">
+        <span class="stat-value">Interaktif</span>
+        <span class="stat-label">Mode Tampilan</span>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Dashboard Analitik · Looker Studio</span>
+        <span class="live-badge">
+          <span class="live-dot"></span>
+          Live
+        </span>
+      </div>
+      <div class="iframe-wrapper">
+        <iframe
+          src="https://datastudio.google.com/embed/reporting/8e30aa30-b2cb-45e8-ab38-37ccb55c8925/page/xvYwF"
+          allowfullscreen
+          sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+        </iframe>
+      </div>
+    </div>
+
+    <footer>
+      <span class="footer-note">Data disajikan langsung dari Looker Studio · Diperbarui otomatis</span>
+      <span class="footer-badge">Business Intelligence Report</span>
+    </footer>
+
+  </div>
+</body>
+</html>
